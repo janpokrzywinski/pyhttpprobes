@@ -3,15 +3,16 @@
 # Create HTTP session that will reuse KA connection to send multiple requests
 
 import argparse
+import datetime
+import requests
 import signal
 import sys
-import requests
 import time
 
 
 def signal_handler(signal, frame):
     """ Signal hander used to capture Ctrl+C """
-    print 'User Interrupted'
+    print "User Interrupted, exiting"
     sys.exit(0)
 
 
@@ -23,20 +24,26 @@ class probe():
         return
 
     def infinite(self, dest, delay):
+        """ Run infinite HTTP Probes to the target """
         counter = 0
         while True:
             r = self.s.head(dest)
-            print "Response Code: {} Request ID {}".format(
-                                            str(r.status_code), str(counter))
+            print "{} Response Code: {} Request ID {}".format(
+                str(datetime.datetime.now()),
+                str(r.status_code),
+                str(counter))
             counter += 1
             time.sleep(delay)
         return
 
     def counted(self, dest, delay, end):
+        """ Run certain amount of HTTP Probes """
         for i in range(0, end):
             r = self.s.head(dest)
-            print "Response Code: {} Request ID: {}".format(
-                                            str(r.status_code), str(i))
+            print "{} Response Code: {} Request ID: {}".format(
+                str(datetime.datetime.now()),
+                str(r.status_code),
+                str(i))
             time.sleep(delay)
         return
 
@@ -66,7 +73,7 @@ def main():
         args.URL = "http://" + args.URL
     print "Probing URL: {}".format(args.URL)
     if args.delay:
-        delay = args.delay / 1000
+        delay = args.delay / 1000.0
     if args.count:
         prob.counted(args.URL, delay, args.count)
     else:
